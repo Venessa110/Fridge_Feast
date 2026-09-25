@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge Feast 🥗 | Smart Recipe & Meal Planner</title>
+    <title>Novus AI 🥗 | Smart Recipe & Meal Planner</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -52,7 +52,7 @@
                         <i data-lucide="utensils" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <span class="text-xl font-bold font-serif tracking-tight text-slate-900">Fridge Feast <span class="text-xs font-sans px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 font-semibold ml-1">🥗</span></span>
+                        <span class="text-xl font-bold font-serif tracking-tight text-slate-900">Novus AI <span class="text-xs font-sans px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 font-semibold ml-1">🥗</span></span>
                         <p class="text-[10px] text-slate-500 font-medium hidden sm:block">Cook smart with ingredients you already own</p>
                     </div>
                 </div>
@@ -239,7 +239,7 @@
                         <span>Meal Recommendations</span>
                         <span id="recipes-count-badge" class="text-xs font-sans bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full font-bold">0 found</span>
                     </h2>
-                    <p class="text-xs text-slate-500">Sorted strictly from <b>fastest & easiest</b> to <b>longer cook times</b></p>
+                    <p class="text-xs text-slate-500">Sorted from <b>fastest & easiest</b> to <b>longer cook times</b></p>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -622,7 +622,7 @@
         let GEMINI_API_KEY = ""; 
 
         // --- SUPPORTED ACTIVE GEMINI MODELS ---
-        const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3-flash-preview'];
+        const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
 
         // --- UNIVERSAL RESILIENT GEMINI CALL HELPER ---
         async function callGeminiApi(payload, systemInstruction = null) {
@@ -637,6 +637,9 @@
                 if (proxyRes.ok) {
                     const data = await proxyRes.json();
                     return data;
+                }else {
+                    const errData = await proxyRes.json().catch(() => ({}));
+                    console.warn('Backend proxy returned an error status:', proxyRes.status, errData);
                 }
             } catch (proxyError) {
                 console.warn('Backend proxy unconfigured or unreachable, attempting direct API fallback...', proxyError);
@@ -650,9 +653,17 @@
             let lastError = null;
             for (const model of GEMINI_MODELS) {
                 try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
                     
-                    const bodyData = { ...payload };
+                    const bodyData = {
+                        contents: [
+                            {
+                                parts: [
+                                    { text: payload }
+                                    ]
+                            }
+                            ]
+                    };
                     if (systemInstruction) {
                         bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
                     }

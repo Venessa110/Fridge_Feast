@@ -1,7 +1,8 @@
 // Node.js / Vercel Serverless Function Proxy
 // File path: api/gemini.js
+    
 
-export default async function handler(req, res) {
+async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -20,12 +21,35 @@ export default async function handler(req, res) {
     }
 
     const { payload, systemInstruction, model } = req.body || {};
-    const selectedModel = model || 'gemini-3.8-flash';
+    const selectedModel = model || 'gemini-3.5-flash';
+    
+    if (!payload) {
+        return res.status(400).json({ error: 'Payload body missing from request.' });
+    }
 
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
+
+        // Ensure payload text is extracted as a string regardless of frontend structure
+let promptText = "";
+if (typeof payload === 'object' && payload !== null) {
+    // If frontend sent an object, look for a text/ingredients property or stringify it
+    promptText = payload.text || payload.ingredients || JSON.stringify(payload);
+} else {
+    // If frontend sent a clean raw string
+    promptText = payload || "";
+}
         
-        const bodyData = { ...payload };
+        const bodyData = {
+            contents: [
+                { 
+                    parts: [
+                        { text: promptText }
+                        ]
+                }
+                ]
+        };
+        
         if (systemInstruction) {
             bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
         }
@@ -39,6 +63,7 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
+            console.error( 'Google Gemini API Error Details:', JSON.stringify(data, null, 2));
             return res.status(response.status).json(data);
         }
 
@@ -48,3 +73,5 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 }
+
+module.exports = handler;
