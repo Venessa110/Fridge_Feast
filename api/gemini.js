@@ -28,7 +28,7 @@ async function handler(req, res) {
     }
 
     try {
-        const apiUrl = `https://googleapis.com${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
 
         // Ensure payload text is extracted as a string regardless of frontend structure
 let promptText = "";
