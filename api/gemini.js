@@ -29,6 +29,16 @@ async function handler(req, res) {
 
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
+
+        // Ensure payload text is extracted as a string regardless of frontend structure
+let promptText = "";
+if (typeof payload === 'object' && payload !== null) {
+    // If frontend sent an object, look for a text/ingredients property or stringify it
+    promptText = payload.text || payload.ingredients || JSON.stringify(payload);
+} else {
+    // If frontend sent a clean raw string
+    promptText = payload || "";
+}
         
         const bodyData = {
             contents: [
