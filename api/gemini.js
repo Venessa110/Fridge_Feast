@@ -1,17 +1,8 @@
 // Node.js / Vercel Serverless Function Proxy
 // File path: api/gemini.js
-
-// api/gemini.js
-export default async function handler(req, res) {
-    console.log("Vercel Environment Keys Present:", {
-        hasGeminiKey: !!process.env.GEMINI_API_KEY,
-        hasGoogleKey: !!process.env.GOOGLE_API_KEY,
-        hasGenAIKey: !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
-    });
     
-//to check why eror 500 occurs
 
-export default async function handler(req, res) {
+async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -31,6 +22,10 @@ export default async function handler(req, res) {
 
     const { payload, systemInstruction, model } = req.body || {};
     const selectedModel = model || 'gemini-2.5-flash';
+    
+    if (!payload) {
+        return res.status(400).json({ error: 'Payload body missing from request.' });
+    }
 
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
@@ -68,3 +63,5 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 }
+
+module.exports = handler;
