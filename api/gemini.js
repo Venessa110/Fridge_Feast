@@ -20,12 +20,21 @@ export default async function handler(req, res) {
     }
 
     const { payload, systemInstruction, model } = req.body || {};
-    const selectedModel = model || 'gemini-3.8-flash';
+    const selectedModel = model || 'gemini-2.5-flash';
 
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
         
-        const bodyData = { ...payload };
+        const bodyData = {
+            contents: [
+                { 
+                    parts: [
+                        { text: payload }
+                        ]
+                }
+                ]
+        };
+        
         if (systemInstruction) {
             bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
         }
@@ -39,6 +48,7 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
+            console.error( 'Google Gemini API Error Details:' JSON.stringify(data, null, 2));
             return res.status(response.status).json(data);
         }
 
