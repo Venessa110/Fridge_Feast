@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://novus-tech-ai.vercel.app/
