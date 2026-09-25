@@ -8,6 +8,9 @@ export default async function handler(req, res) {
     }
 
     // Check all possible environment variable names set in Vercel
+
+    // Retrieve the secret API key from server environment variables (never exposed to browser)
+
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
     if (!GEMINI_API_KEY) {
