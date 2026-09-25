@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fridge Feast 🥗 | Smart Recipe & Meal Planner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #recipe-modal, #recipe-modal * { visibility: visible; }
+            #recipe-modal { position: absolute; left: 0; top: 0; width: 100%; height: auto; background: white !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 bg-slate-50 antialiased selection:bg-brand-500 selection:text-white">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i data-lucide="utensils" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold font-serif tracking-tight text-slate-900">Fridge Feast <span class="text-xs font-sans px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 font-semibold ml-1">🥗</span></span>
+                        <p class="text-[10px] text-slate-500 font-medium hidden sm:block">Cook smart with ingredients you already own</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs & API Key Button -->
+                <div class="flex items-center gap-2">
+                    <nav class="flex items-center space-x-1 sm:space-x-2">
+                        <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <!-- Navigation Tabs -->
+                <div class="flex items-center gap-2">
+                    <nav class="flex items-center space-x-1 sm:space-x-2">
+                        <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Find Recipes</span>
+                        </button>
+                        <button onclick="switchTab('planner')" id="tab-btn-planner" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                            <span>Meal Planner</span>
+                        </button>
+                        <button onclick="switchTab('impact')" id="tab-btn-impact" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                            <i data-lucide="piggy-bank" class="w-4 h-4"></i>
+                            <span>Savings</span>
+                        </button>
+                        <button onclick="switchTab('chat')" id="tab-btn-chat" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                            <i data-lucide="bot" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">Chef Novus</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <section id="tab-recipes" class="space-y-6">
+
+            <!-- Hero & Scanner Box -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-brand-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="max-w-2xl relative z-10 space-y-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                        <i data-lucide="camera" class="w-3.5 h-3.5"></i> Photo Vision & AI Strict Ingredient Match
+                    </span>
+                    <h1 class="text-2xl sm:text-4xl font-serif font-bold tracking-tight leading-tight">
+                        What's inside your fridge today?
+                    </h1>
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                        Snap or upload a photo, or type your items below. We strictly match real, authentic recipes that use <b>only your ingredients</b>, sorted from <b>easiest & fastest</b> to make!
+                    </p>
+
+                    <!-- Input Mode Toggle Buttons -->
+                    <div class="flex flex-wrap items-center gap-2 pt-2">
+                        <button onclick="toggleInputMode('type')" id="mode-btn-type" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-brand-500 text-white shadow-md">
+                            <i data-lucide="search" class="w-4 h-4"></i> Search & Type
+                        </button>
+                        <button onclick="toggleInputMode('photo')" id="mode-btn-photo" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/10">
+                            <i data-lucide="camera" class="w-4 h-4"></i> Photo / Camera Scanner
+                        </button>
+                        <button onclick="openPantryLocker()" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30">
+                            <i data-lucide="archive" class="w-4 h-4"></i> 🧂 Pantry Locker
+                        </button>
+                    </div>
+
+                    <!-- Search & Voice Bar Box -->
+                    <div id="input-box-type" class="mt-4 space-y-3">
+                        <div class="relative flex items-center">
+                            <input type="text" id="ingredient-search-input" 
+                                placeholder="Type ingredients (e.g. Eggs, Tomatoes, Rice, Garlic)..." 
+                                class="w-full bg-white/10 border border-white/20 rounded-2xl pl-4 pr-24 py-3.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 backdrop-blur-md"
+                                onkeydown="if(event.key==='Enter'){ addIngredientFromInput(); event.preventDefault(); }">
+                            
+                            <div class="absolute right-2 flex items-center gap-1">
+                                <button onclick="startVoiceInput()" id="mic-btn" title="Speak ingredients" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition">
+                                    <i data-lucide="mic" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="addIngredientFromInput()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition">
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap text-xs text-slate-300">
+                            <span class="text-slate-400">Quick add:</span>
+                            <button onclick="quickAddTag('Eggs')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Eggs</button>
+                            <button onclick="quickAddTag('Tomatoes')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Tomatoes</button>
+                            <button onclick="quickAddTag('Garlic')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Garlic</button>
+                            <button onclick="quickAddTag('Onion')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Onion</button>
+                            <button onclick="quickAddTag('Rice')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Rice</button>
+                            <button onclick="quickAddTag('Cheese')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 transition">+ Cheese</button>
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload Scanner Box -->
+                    <div id="input-box-photo" class="hidden mt-4 space-y-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="cursor-pointer flex flex-col items-center justify-center p-4 border-2 border-dashed border-white/20 rounded-xl hover:bg-white/10 transition text-center">
+                                <i data-lucide="upload-cloud" class="w-8 h-8 text-brand-400 mb-1"></i>
+                                <span class="text-xs font-bold text-white">Upload Fridge Photo</span>
+                                <span class="text-[10px] text-slate-400">JPG, PNG or WEBP</span>
+                                <input type="file" id="upload-file-input" accept="image/*" class="hidden" onchange="handlePhotoScan(event)">
+                            </label>
+
+                            <button onclick="triggerCameraCapture()" class="flex flex-col items-center justify-center p-4 border-2 border-white/20 rounded-xl hover:bg-white/10 transition text-center bg-white/5">
+                                <i data-lucide="aperture" class="w-8 h-8 text-emerald-400 mb-1"></i>
+                                <span class="text-xs font-bold text-white">Take Live Camera Photo</span>
+                                <span class="text-[10px] text-slate-400">Snap directly on mobile or web</span>
+                            </button>
+                            <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoScan(event)">
+                        </div>
+
+                        <!-- Sample Scenarios -->
+                        <div class="border-t border-white/10 pt-3">
+                            <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block mb-2">Or test sample fridge scenarios:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="loadSampleScenario('breakfast')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-xs font-semibold hover:bg-amber-500/30 transition">
+                                    🍳 Morning Fridge (Eggs, Tomatoes, Cheese)
+                                </button>
+                                <button onclick="loadSampleScenario('pantry')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-500/30 transition">
+                                    🍝 Pasta Staples (Pasta, Garlic, Tomatoes)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Ingredient Tags Container -->
+                    <div class="mt-4 pt-4 border-t border-white/10">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs uppercase font-bold tracking-wider text-brand-300 flex items-center gap-1.5">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Active Items (Click ⚠️ to mark "Use Soon")
+                            </span>
+                            <button onclick="clearAllIngredients()" class="text-xs text-slate-400 hover:text-white transition">Clear all</button>
+                        </div>
+
+                        <div id="ingredient-tags-container" class="flex flex-wrap gap-2 min-h-[36px] items-center">
+                            <!-- Tags injected dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-white/10 space-y-2">
+                        <span class="text-xs uppercase font-bold tracking-wider text-brand-300 flex items-center gap-1.5">
+                            <i data-lucide="filter" class="w-3.5 h-3.5"></i> Dietary Preference Filter
+                        </span>
+                        <div id="dietary-filters-container" class="flex flex-wrap gap-1.5">
+                            <button onclick="setDietaryFilter('all')" id="diet-btn-all" class="px-3 py-1 rounded-xl text-xs font-semibold bg-brand-500 text-white shadow-sm transition">
+                                ✨ All Recipes
+                            </button>
+                            <button onclick="setDietaryFilter('Vegetarian')" id="diet-btn-Vegetarian" class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition">
+                                🌱 Vegetarian
+                            </button>
+                            <button onclick="setDietaryFilter('Vegan')" id="diet-btn-Vegan" class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition">
+                                🥗 Vegan
+                            </button>
+                            <button onclick="setDietaryFilter('Gluten-Free')" id="diet-btn-Gluten-Free" class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition">
+                                🌾 Gluten-Free
+                            </button>
+                            <button onclick="setDietaryFilter('Keto')" id="diet-btn-Keto" class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition">
+                                🥩 Keto / Low-Carb
+                            </button>
+                            <button onclick="setDietaryFilter('Dairy-Free')" id="diet-btn-Dairy-Free" class="px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition">
+                                🧀 Dairy-Free
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="pt-2">
+                        <button onclick="generateRecipes()" class="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-emerald-500 hover:from-brand-600 hover:to-emerald-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2">
+                            <i data-lucide="utensils" class="w-5 h-5"></i>
+                            <span>Generate Meal Recommendations</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Results Header & Sorting Bar -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-xl font-bold font-serif text-slate-900 flex items-center gap-2">
+                        <span>Meal Recommendations</span>
+                        <span id="recipes-count-badge" class="text-xs font-sans bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full font-bold">0 found</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Sorted strictly from <b>fastest & easiest</b> to <b>longer cook times</b></p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="generateRecipes(true)" class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="shuffle" class="w-3.5 h-3.5 text-brand-600"></i>
+                        <span>🔀 Show Different Dishes</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Recipe Cards Injected by JS -->
+            </div>
+
+        </section>
+
+        <section id="tab-planner" class="hidden space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-2xl font-bold font-serif text-slate-900">Weekly Meal Schedule</h2>
+                <p class="text-xs text-slate-500">Plan your week to automatically generate your missing grocery shopping list</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-3">
+                    <div id="weekly-calendar-grid" class="space-y-3">
+                        <!-- Days injected via JS -->
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 text-brand-600"></i> Auto Grocery List
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <button onclick="copyGroceryList()" class="text-xs text-brand-700 hover:text-brand-800 font-semibold flex items-center gap-1">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                                </button>
+                                <button onclick="shareGroceryWhatsApp()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 mb-3">Calculated missing ingredients across planned meals (excluding pantry staples):</p>
+                        <div id="grocery-items-list" class="space-y-2 text-xs text-slate-700 max-h-[350px] overflow-y-auto">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <button onclick="exportMealPlanICS()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Export Schedule to iCal / Phone Calendar
+                        </button>
+                        <button onclick="clearMealPlan()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition">
+                            Reset Weekly Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-impact" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="space-y-2">
+                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-700/50 text-emerald-200 text-xs font-bold border border-emerald-600/50">
+                        💰 Environmental & Financial Impact
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold">Your Kitchen Savings Dashboard</h2>
+                    <p class="text-slate-200 text-xs sm:text-sm max-w-xl">
+                        By cooking with ingredients you already owned, you prevented food waste and saved money instead of ordering takeout!
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 space-y-1 self-stretch md:self-auto">
+                    <label class="text-[10px] uppercase font-bold text-emerald-200 tracking-wider block">Currency Setting</label>
+                    <select id="currency-select" onchange="changeCurrency(this.value)" class="bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full">
+                        <option value="USD">USD ($ - US Dollar)</option>
+                        <option value="EUR">EUR (€ - Euro)</option>
+                        <option value="GBP">GBP (£ - British Pound)</option>
+                        <option value="KES">KES (KSh - Kenyan Shilling)</option>
+                        <option value="CAD">CAD (CA$ - Canadian Dollar)</option>
+                        <option value="AUD">AUD (A$ - Australian Dollar)</option>
+                        <option value="INR">INR (₹ - Indian Rupee)</option>
+                        <option value="JPY">JPY (¥ - Japanese Yen)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-2">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xs text-slate-500 font-semibold block">Estimated Money Saved</span>
+                    <span id="stat-money-saved" class="text-3xl font-bold font-serif text-slate-900">$0.00</span>
+                    <p class="text-[11px] text-slate-400">Based on average local takeout costs vs home leftovers</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-2">
+                    <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
+                        <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xs text-slate-500 font-semibold block">Home Meals Cooked</span>
+                    <span id="stat-meals-cooked" class="text-3xl font-bold font-serif text-slate-900">0</span>
+                    <p class="text-[11px] text-slate-400">Delicious homemade recipes completed</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-2">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                        <i data-lucide="sprout" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xs text-slate-500 font-semibold block">Food Waste Prevented</span>
+                    <span id="stat-waste-prevented" class="text-3xl font-bold font-serif text-slate-900">0.0 kg</span>
+                    <p class="text-[11px] text-slate-400">Ingredients rescued from going to waste</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <h3 class="font-serif font-bold text-slate-900 text-lg">Cooking Activity History</h3>
+                <div id="cooking-history-list" class="space-y-3 text-xs text-slate-600">
+                    <p class="text-slate-400 italic">No meals logged yet. Cook a recipe from your recommendations and click "Mark Meal as Cooked 🎉"!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-chat" class="hidden max-w-4xl mx-auto space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[600px]">
+                <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-bold text-white shadow-md">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">Chef Novus Assistant</h3>
+                            <p class="text-[10px] text-slate-400">Ask for ingredient substitutions, wine pairings, or cooking tips</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30">Gemini AI Active</span>
+                </div>
+
+                <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold flex-shrink-0 text-[10px]">Novus</div>
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 max-w-[85%] shadow-sm">
+                            Hello! I am <b>Chef Novus</b>, your personal culinary assistant. Ask me how to substitute ingredients, modify recipes for dietary needs, or cook something specific! 🍳
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+                    <input type="text" id="chat-user-input" 
+                        placeholder="Ask Chef Novus anything (e.g., 'What can I substitute for eggs in baking?')..." 
+                        class="flex-grow bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        onkeydown="if(event.key==='Enter'){ sendChefNovusMessage(); event.preventDefault(); }">
+                    <button onclick="sendChefNovusMessage()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <span>Send</span>
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Recipe Details Modal -->
+    <div id="recipe-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 relative my-auto">
+            
+            <div class="sticky top-0 z-20 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between no-print">
+                <div class="flex items-center gap-2">
+                    <span id="modal-time-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-100 text-brand-800">
+                        ⏱️ 15 mins
+                    </span>
+                    <span id="modal-difficulty-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                        Easy
+                    </span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print / Export PDF
+                    </button>
+                    <button onclick="closeRecipeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="space-y-3">
+                    <div id="modal-img-container" class="w-full h-52 sm:h-64 rounded-2xl overflow-hidden bg-slate-100 relative">
+                        <img id="modal-img" src="" alt="" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+                    </div>
+                    <h2 id="modal-title" class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">
+                        Recipe Title
+                    </h2>
+                    <p id="modal-description" class="text-xs text-slate-500 leading-relaxed">
+                        Recipe summary and cooking overview.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4 text-brand-600"></i>
+                            <span class="text-xs font-bold text-slate-800">Servings Scaler:</span>
+                            <span id="modal-servings-count" class="font-bold text-brand-700 text-sm">2 Servings</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="servings-slider" min="1" max="8" value="2" oninput="scaleServings(this.value)" class="accent-brand-600 cursor-pointer w-32">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block">CALORIES</span>
+                            <span id="modal-macro-calories" class="font-bold text-slate-800 text-xs">320 kcal</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block">PROTEIN</span>
+                            <span id="modal-macro-protein" class="font-bold text-emerald-700 text-xs">14g</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block">CARBS</span>
+                            <span id="modal-macro-carbs" class="font-bold text-amber-700 text-xs">35g</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block">FAT</span>
+                            <span id="modal-macro-fat" class="font-bold text-rose-700 text-xs">10g</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
+                            <i data-lucide="timer" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Kitchen Step Timer</span>
+                            <span id="timer-display" class="font-mono text-xl font-bold">05:00</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTimer()" id="timer-start-btn" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                            Start
+                        </button>
+                        <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-serif text-lg font-bold text-slate-900 mb-3 flex items-center justify-between">
+                        <span>Required Ingredients</span>
+                    </h3>
+                    <ul id="modal-ingredients-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
+                        <!-- Injected via JS -->
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                        <h3 class="font-serif text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span>Step-by-Step Instructions</span>
+                        </h3>
+                        
+                        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs">
+                            <button id="voice-read-btn" onclick="speakCurrentStep()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Read Step
+                            </button>
+                            <button id="voice-handsfree-btn" onclick="toggleHandsFreeMode()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                                <i data-lucide="mic" class="w-3.5 h-3.5"></i> Hands-Free Commands
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="handsfree-status-banner" class="hidden mb-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs p-2.5 rounded-xl flex items-center justify-between">
+                        <span class="flex items-center gap-1.5 font-medium">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Hands-free active! Say <b class="font-mono">"Next"</b>, <b class="font-mono">"Back"</b>, or <b class="font-mono">"Repeat"</b>.
+                        </span>
+                        <button onclick="toggleHandsFreeMode()" class="text-amber-700 hover:underline font-bold text-[10px]">Stop</button>
+                    </div>
+
+                    <div id="modal-steps-list" class="space-y-3">
+                        <!-- Steps injected via JS -->
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <button onclick="markMealAsCooked()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 text-sm transition flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        <span>Mark Meal as Cooked 🎉 (+ Log Savings)</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantry Locker Modal -->
+    <div id="pantry-locker-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-100 relative">
+            <button onclick="closePantryLocker()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                    <i data-lucide="archive" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Pantry Locker</h3>
+                    <p class="text-xs text-slate-500">Persistent household staples always in stock</p>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="new-staple-input" placeholder="Add staple (e.g. Salt, Oil, Flour, Soy Sauce)..." 
+                        class="flex-grow bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        onkeydown="if(event.key==='Enter'){ addPantryStaple(); event.preventDefault(); }">
+                    <button onclick="addPantryStaple()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition">
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <div id="pantry-staples-grid" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto pt-2">
+                <!-- Injected by JS -->
+            </div>
+
+            <p class="text-[10px] text-slate-400 italic border-t border-slate-100 pt-3">
+                Staples in your Pantry Locker are saved on this device and automatically excluded from missing grocery items.
+            </p>
+        </div>
+    </div>
+
+    <!-- Live WebRTC Camera Modal -->
+    <div id="camera-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-5 space-y-4 shadow-2xl border border-slate-800 relative overflow-hidden flex flex-col items-center">
+            <div class="w-full flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
+                    <span class="text-xs font-bold text-white tracking-wide uppercase">Live Fridge Camera Scanner</span>
+                </div>
+                <button onclick="closeCameraModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <video id="camera-video-feed" autoplay playsinline class="w-full h-full object-cover"></video>
+                <canvas id="camera-canvas" class="hidden"></canvas>
+                <div class="absolute inset-4 border-2 border-dashed border-emerald-400/40 rounded-xl pointer-events-none flex items-center justify-center">
+                    <span class="text-[10px] bg-slate-900/80 text-emerald-300 font-mono px-2.5 py-1 rounded-full backdrop-blur border border-emerald-500/30">
+                        📸 Frame fridge ingredients here
+                    </span>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-between gap-3 pt-2">
+                <button onclick="switchCameraFacing()" id="switch-camera-btn" class="px-3.5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span>Flip Cam</span>
+                </button>
+
+                <button onclick="snapLiveCameraPhoto()" class="flex-grow bg-gradient-to-r from-emerald-500 to-brand-500 hover:from-emerald-600 hover:to-brand-600 text-white font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Snap & Analyze Photo 📸</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let GEMINI_API_KEY = ""; 
+
+        // --- SUPPORTED ACTIVE GEMINI MODELS ---
+        const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3-flash-preview'];
+
+        // --- UNIVERSAL RESILIENT GEMINI CALL HELPER ---
+        async function callGeminiApi(payload, systemInstruction = null) {
+            // First attempt: call secure backend serverless proxy (/api/gemini)
+            try {
+                const proxyRes = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payload, systemInstruction })
+                });
+
+                if (proxyRes.ok) {
+                    const data = await proxyRes.json();
+                    return data;
+                }
+            } catch (proxyError) {
+                console.warn('Backend proxy unconfigured or unreachable, attempting direct API fallback...', proxyError);
+            }
+
+            // Fallback: Direct Google Gemini API call using local GEMINI_API_KEY variable above
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_API_KEY_HERE") {
+                throw new Error("Missing Gemini API Key or active serverless backend proxy.");
+            }
+
+            let lastError = null;
+            for (const model of GEMINI_MODELS) {
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                    
+                    const bodyData = { ...payload };
+                    if (systemInstruction) {
+                        bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
+                    }
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(bodyData)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data;
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        const msg = errData.error?.message || response.statusText;
+                        const lowerMsg = msg.toLowerCase();
+                        
+                        if (response.status === 404 || response.status === 400 || lowerMsg.includes('not found') || lowerMsg.includes('not supported') || lowerMsg.includes('no longer available') || lowerMsg.includes('deprecated')) {
+                            console.warn(`Model ${model} failed/unsupported (${msg}), attempting next fallback...`);
+                            lastError = new Error(msg);
+                            continue;
+                        } else {
+                            throw new Error(msg);
+                        }
+                    }
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+            throw lastError || new Error("Unable to connect to Gemini API. Please check your API Key or network connection.");
+        }
+
+        // --- STATE MANAGEMENT ---
+        let activeIngredients = [];
+        let expiryAlerts = {};
+        let activeDietaryFilter = 'all';
+        let pantryStaples = JSON.parse(localStorage.getItem('ff_pantry_staples') || '["Salt", "Pepper", "Cooking Oil", "Garlic Powder", "Water"]');
+        
+        const CARTOON_CHEF_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' rx='20' fill='%23f8fafc'/><circle cx='100' cy='110' r='38' fill='%23fde047'/><circle cx='86' cy='102' r='4' fill='%231e293b'/><circle cx='114' cy='102' r='4' fill='%231e293b'/><path d='M90 120 Q100 128 110 120' stroke='%231e293b' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M70 82 C65 40 135 40 130 82 Z' fill='%23ffffff' stroke='%23e2e8f0' stroke-width='3'/><path d='M60 82 C60 72 140 72 140 82 C140 90 60 90 60 82 Z' fill='%23ffffff' stroke='%23cbd5e1' stroke-width='2'/><path d='M75 148 L125 148 L120 190 L80 190 Z' fill='%2322c55e'/><circle cx='100' cy='140' r='7' fill='%23ef4444'/><text x='100' y='30' font-family='sans-serif' font-size='11' font-weight='bold' fill='%2394a3b8' text-anchor='middle'>👨‍🍳 CHEF NOVUS</text></svg>";
+
+        let weeklyPlan = JSON.parse(localStorage.getItem('ff_weekly_plan') || '{"Mon":"","Tue":"","Wed":"","Thu":"","Fri":"","Sat":"","Sun":""}');
+        let userCurrency = localStorage.getItem('ff_currency') || 'USD';
+        let impactStats = JSON.parse(localStorage.getItem('ff_impact_stats') || '{"mealsCooked":0, "wastePreventedKg":0.0, "history":[]}');
+        
+        let currentModalRecipe = null;
+        let scaledServings = 2;
+        let timerInterval = null;
+        let timerSeconds = 300;
+        let isTimerRunning = false;
+
+        let currentStepVoiceIndex = 0;
+        let handsFreeRecognition = null;
+        let isHandsFreeActive = false;
+
+        let activeCameraStream = null;
+        let currentFacingMode = 'environment';
+
+        const CURRENCY_SYMBOLS = { USD: '$', EUR: '€', GBP: '£', KES: 'KSh ', CAD: 'CA$', AUD: 'A$', INR: '₹', JPY: '¥' };
+        const CURRENCY_SAVINGS_PER_MEAL = { USD: 12.50, EUR: 11.50, GBP: 10.00, KES: 1200, CAD: 16.00, AUD: 18.00, INR: 350, JPY: 1500 };
+
+        const CLASSIC_RECIPES_DATABASE = [
+            {
+                id: 'c1',
+                title: 'Classic French Omelette',
+                prepTime: 3,
+                cookTime: 5,
+                totalTime: 8,
+                difficulty: 'Easy',
+                category: 'Breakfast',
+                dietary: ['Vegetarian', 'Gluten-Free', 'Keto', 'Dairy-Free'],
+                image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80',
+                ingredients: [
+                    { name: 'Eggs', amount: 3, unit: 'pcs' },
+                    { name: 'Butter', amount: 1, unit: 'tbsp' },
+                    { name: 'Salt', amount: 0.5, unit: 'tsp' },
+                    { name: 'Pepper', amount: 0.25, unit: 'tsp' }
+                ],
+                steps: [
+                    'Whisk eggs vigorously with salt and pepper until smooth.',
+                    'Melt butter in a non-stick skillet over medium-low heat.',
+                    'Pour in eggs and stir gently with a spatula until soft curds form.',
+                    'Fold gently into a cylinder and slide onto a warm plate.'
+                ],
+                macros: { calories: 220, protein: 18, carbs: 2, fat: 16 }
+            },
+            {
+                id: 'c2',
+                title: 'Authentic Caprese Salad',
+                prepTime: 7,
+                cookTime: 0,
+                totalTime: 7,
+                difficulty: 'Easy',
+                category: 'Salad',
+                dietary: ['Vegetarian', 'Gluten-Free', 'Keto'],
+                image: 'https://images.unsplash.com/photo-1592417817098-8f3d6ef23a80?auto=format&fit=crop&w=600&q=80',
+                ingredients: [
+                    { name: 'Tomatoes', amount: 2, unit: 'sliced' },
+                    { name: 'Cheese', amount: 150, unit: 'g' },
+                    { name: 'Olive Oil', amount: 2, unit: 'tbsp' },
+                    { name: 'Salt', amount: 0.5, unit: 'tsp' }
+                ],
+                steps: [
+                    'Slice fresh tomatoes and cheese into 1/4-inch round thick slabs.',
+                    'Alternate slices of tomato and cheese on a serving plate.',
+                    'Drizzle generously with extra virgin olive oil and season with sea salt.'
+                ],
+                macros: { calories: 310, protein: 16, carbs: 6, fat: 24 }
+            },
+            {
+                id: 'c3',
+                title: 'Sinangag Garlic Fried Rice',
+                prepTime: 5,
+                cookTime: 7,
+                totalTime: 12,
+                difficulty: 'Easy',
+                category: 'Sides',
+                dietary: ['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free'],
+                image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80',
+                ingredients: [
+                    { name: 'Rice', amount: 2, unit: 'cups cooked' },
+                    { name: 'Garlic', amount: 4, unit: 'cloves minced' },
+                    { name: 'Cooking Oil', amount: 2, unit: 'tbsp' },
+                    { name: 'Salt', amount: 1, unit: 'tsp' }
+                ],
+                steps: [
+                    'Heat oil in a wok over medium heat. Sauté minced garlic until golden brown and crispy.',
+                    'Add cold leftover cooked rice, breaking up any clumps with a spatula.',
+                    'Toss continuously for 5-7 minutes until rice is heated through. Season with salt.'
+                ],
+                macros: { calories: 380, protein: 7, carbs: 65, fat: 10 }
+            },
+            {
+                id: 'c4',
+                title: 'Shakshuka Eggs in Tomato Sauce',
+                prepTime: 5,
+                cookTime: 10,
+                totalTime: 15,
+                difficulty: 'Medium',
+                category: 'Main',
+                dietary: ['Vegetarian', 'Gluten-Free', 'Dairy-Free'],
+                image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=600&q=80',
+                ingredients: [
+                    { name: 'Eggs', amount: 4, unit: 'large' },
+                    { name: 'Tomatoes', amount: 3, unit: 'chopped' },
+                    { name: 'Onion', amount: 1, unit: 'diced' },
+                    { name: 'Garlic', amount: 2, unit: 'cloves' },
+                    { name: 'Cooking Oil', amount: 2, unit: 'tbsp' }
+                ],
+                steps: [
+                    'Heat oil in a skillet. Sauté diced onions and garlic until translucent.',
+                    'Add chopped tomatoes and simmer for 5 minutes until a thick sauce forms.',
+                    'Make 4 small wells in the tomato sauce and crack an egg into each well.',
+                    'Cover pan with a lid and cook on low heat for 5 minutes until egg whites set.'
+                ],
+                macros: { calories: 290, protein: 16, carbs: 14, fat: 18 }
+            },
+            {
+                id: 'c5',
+                title: 'Spaghetti Aglio e Olio',
+                prepTime: 5,
+                cookTime: 12,
+                totalTime: 17,
+                difficulty: 'Medium',
+                category: 'Pasta',
+                dietary: ['Vegetarian', 'Vegan', 'Dairy-Free'],
+                image: 'https://images.unsplash.com/photo-1621996346565-e3def6164286?auto=format&fit=crop&w=600&q=80',
+                ingredients: [
+                    { name: 'Pasta', amount: 200, unit: 'g' },
+                    { name: 'Garlic', amount: 5, unit: 'cloves sliced' },
+                    { name: 'Olive Oil', amount: 4, unit: 'tbsp' },
+                    { name: 'Salt', amount: 1, unit: 'tbsp' }
+                ],
+                steps: [
+                    'Boil pasta in salted water until al dente.',
+                    'Gently warm sliced garlic in olive oil over low heat until pale golden.',
+                    'Toss pasta into garlic oil with 1/4 cup pasta water until emulsion forms.'
+                ],
+                macros: { calories: 480, protein: 12, carbs: 68, fat: 18 }
+            }
+        ];
+
+        function switchTab(tabId) {
+            const tabs = ['recipes', 'planner', 'impact', 'chat'];
+            tabs.forEach(t => {
+                const sec = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (sec) sec.classList.add('hidden');
+                if (btn) {
+                    btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                }
+            });
+
+            const targetSec = document.getElementById(`tab-${tabId}`);
+            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetBtn) {
+                targetBtn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700";
+            }
+
+            if (tabId === 'planner') renderWeeklyPlanner();
+            if (tabId === 'impact') updateImpactDashboardUI();
+            lucide.createIcons();
+        }
+
+        function toggleInputMode(mode) {
+            const typeBox = document.getElementById('input-box-type');
+            const photoBox = document.getElementById('input-box-photo');
+            const typeBtn = document.getElementById('mode-btn-type');
+            const photoBtn = document.getElementById('mode-btn-photo');
+
+            if (mode === 'type') {
+                typeBox.classList.remove('hidden');
+                photoBox.classList.add('hidden');
+                typeBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-brand-500 text-white shadow-md";
+                photoBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/10";
+            } else {
+                typeBox.classList.add('hidden');
+                photoBox.classList.remove('hidden');
+                photoBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-brand-500 text-white shadow-md";
+                typeBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/10";
+            }
+        }
+
+        function quickAddTag(tag) {
+            if (!activeIngredients.includes(tag)) {
+                activeIngredients.push(tag);
+                renderIngredientTags();
+                generateRecipes();
+            }
+        }
+
+        function addIngredientFromInput() {
+            const input = document.getElementById('ingredient-search-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (val) {
+                const items = val.split(',').map(s => s.trim()).filter(Boolean);
+                items.forEach(item => {
+                    const formatted = item.charAt(0).toUpperCase() + item.slice(1);
+                    if (!activeIngredients.includes(formatted)) {
+                        activeIngredients.push(formatted);
+                    }
+                });
+                input.value = '';
+                renderIngredientTags();
+                generateRecipes();
+            }
+        }
+
+        function removeIngredientTag(ing) {
+            activeIngredients = activeIngredients.filter(i => i !== ing);
+            delete expiryAlerts[ing];
+            renderIngredientTags();
+            generateRecipes();
+        }
+
+        function clearAllIngredients() {
+            activeIngredients = [];
+            expiryAlerts = {};
+            renderIngredientTags();
+            generateRecipes();
+        }
+
+        function toggleIngredientExpiry(ing) {
+            expiryAlerts[ing] = !expiryAlerts[ing];
+            renderIngredientTags();
+            generateRecipes();
+        }
+
+        function renderIngredientTags() {
+            const container = document.getElementById('ingredient-tags-container');
+            if (!container) return;
+
+            if (activeIngredients.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 italic">No ingredients added yet. Type or scan to begin.</span>`;
+                return;
+            }
+
+            container.innerHTML = activeIngredients.map(ing => {
+                const isExpiry = expiryAlerts[ing];
+                return `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 text-white border ${isExpiry ? 'border-amber-400 bg-amber-500/20' : 'border-white/20'}">
+                        <span>${ing}</span>
+                        <button onclick="toggleIngredientExpiry('${ing}')" title="Mark Use Soon ⚠️" class="hover:text-amber-300 ${isExpiry ? 'text-amber-300 font-bold' : 'text-slate-400'}">
+                            ⚠️
+                        </button>
+                        <button onclick="removeIngredientTag('${ing}')" class="hover:text-red-400 text-slate-300 ml-1">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </span>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function setDietaryFilter(filterKey) {
+            activeDietaryFilter = filterKey;
+            
+            const keys = ['all', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 'Dairy-Free'];
+            keys.forEach(k => {
+                const btn = document.getElementById(`diet-btn-${k}`);
+                if (btn) {
+                    if (k === filterKey) {
+                        btn.className = "px-3 py-1 rounded-xl text-xs font-semibold bg-brand-500 text-white shadow-sm transition";
+                    } else {
+                        btn.className = "px-3 py-1 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition";
+                    }
+                }
+            });
+
+            generateRecipes();
+            showToast("🥗 Filter Applied", `Showing ${filterKey === 'all' ? 'all' : filterKey} recipes`);
+        }
+
+        function checkRecipeDietary(recipe, filter) {
+            if (filter === 'all') return true;
+            if (recipe.dietary && Array.isArray(recipe.dietary) && recipe.dietary.includes(filter)) {
+                return true;
+            }
+
+            const ingText = (recipe.ingredients || []).map(i => i.name.toLowerCase()).join(' ');
+            const hasMeat = ['chicken', 'beef', 'pork', 'meat', 'bacon', 'sausage', 'fish', 'salmon', 'tuna', 'shrimp', 'turkey', 'lamb'].some(m => ingText.includes(m));
+            const hasDairy = ['cheese', 'butter', 'milk', 'cream', 'yogurt'].some(d => ingText.includes(d));
+            const hasEgg = ingText.includes('egg');
+            const hasGluten = ['pasta', 'bread', 'flour', 'spaghetti', 'wheat', 'noodle', 'tortilla'].some(g => ingText.includes(g));
+
+            if (filter === 'Vegetarian') return !hasMeat;
+            if (filter === 'Vegan') return !hasMeat && !hasDairy && !hasEgg;
+            if (filter === 'Gluten-Free') return !hasGluten;
+            if (filter === 'Dairy-Free') return !hasDairy;
+            if (filter === 'Keto') return (recipe.macros ? recipe.macros.carbs <= 15 : !hasGluten && !ingText.includes('rice'));
+            return true;
+        }
+
+        async function fetchStrictGeminiRecipes(userIngredients, staples) {
+            const prompt = `You are an expert master chef and real-world culinary database API.
+The user currently has ONLY these specific fridge ingredients available: ${userIngredients.join(', ')}.
+Household pantry staples available: ${staples.join(', ')}.
+
+Generate 4 authentic, real, existing published recipes from global or traditional cookbooks that specifically feature and incorporate these user ingredients as central components.
+Do NOT invent fake titles or fake combinations. Ensure every step and measurement is realistic.
+Order the recipes strictly from SHORTEST total cook time to LONGEST total cook time.
+
+Return JSON adhering to this exact schema structure:
+[
+  {
+    "id": "str",
+    "title": "str",
+    "prepTime": 0,
+    "cookTime": 0,
+    "totalTime": 0,
+    "difficulty": "Easy",
+    "category": "Main",
+    "dietary": ["Vegetarian"],
+    "ingredients": [{"name": "str", "amount": 1, "unit": "cup"}],
+    "steps": ["step 1"],
+    "macros": {"calories": 300, "protein": 10, "carbs": 20, "fat": 5}
+  }
+]`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+
+            const data = await callGeminiApi(payload);
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) return [];
+
+            const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            const recipes = JSON.parse(cleanJson);
+            return recipes.map(r => ({
+                ...r,
+                image: (r.image && r.image.startsWith('http')) ? r.image : ''
+            }));
+        }
+
+        async function generateRecipes(isShuffle = false) {
+            const grid = document.getElementById('recipes-grid');
+            if (!grid) return;
+
+            const input = document.getElementById('ingredient-search-input');
+            if (input && input.value.trim()) {
+                addIngredientFromInput();
+                return;
+            }
+
+            grid.innerHTML = `<div class="col-span-full text-center py-12 space-y-3">
+                <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p class="text-xs text-slate-500 font-semibold">Querying Gemini AI for strict matching recipes...</p>
+            </div>`;
+
+            let matches = [];
+
+            if (activeIngredients.length > 0) {
+                try {
+                    const aiRecipes = await fetchStrictGeminiRecipes(activeIngredients, pantryStaples);
+                    if (aiRecipes && aiRecipes.length > 0) {
+                        matches = aiRecipes;
+                    }
+                } catch (e) {
+                    console.warn("Gemini Live Recipe Query failed, falling back to local dataset.", e);
+                    showToast("⚠️ Gemini API Alert", e.message || "Failed to fetch live AI recipes. Showing local recipes.");
+                }
+            }
+
+            if (matches.length === 0) {
+                const availableSet = new Set([
+                    ...activeIngredients.map(i => i.toLowerCase()),
+                    ...pantryStaples.map(p => p.toLowerCase())
+                ]);
+
+                CLASSIC_RECIPES_DATABASE.forEach(recipe => {
+                    if (!checkRecipeDietary(recipe, activeDietaryFilter)) return;
+
+                    let matchCount = 0;
+                    recipe.ingredients.forEach(ing => {
+                        if (availableSet.has(ing.name.toLowerCase())) {
+                            matchCount++;
+                        }
+                    });
+
+                    if (activeIngredients.length === 0 || matchCount > 0) {
+                        matches.push({ ...recipe, matchScore: matchCount });
+                    }
+                });
+            }
+
+            matches = matches.filter(r => checkRecipeDietary(r, activeDietaryFilter));
+
+            if (isShuffle) {
+                matches.sort(() => Math.random() - 0.5);
+            } else {
+                matches.sort((a, b) => a.totalTime - b.totalTime);
+            }
+
+            renderRecipeCards(matches.slice(0, 6));
+        }
+
+        function renderRecipeCards(recipes) {
+            const grid = document.getElementById('recipes-grid');
+            const badge = document.getElementById('recipes-count-badge');
+            if (!grid) return;
+
+            if (badge) badge.innerText = `${recipes.length} found`;
+
+            if (recipes.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-3">
+                        <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto"></i>
+                        <h3 class="font-bold text-slate-800 text-base">No Strict Matching Recipes Found</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">Try adding more fridge items or selecting a different dietary filter (${activeDietaryFilter}).</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = recipes.map(recipe => {
+                const dietTags = recipe.dietary || [];
+                const hasValidImg = recipe.image && recipe.image.trim().length > 0 && recipe.image.startsWith('http');
+                const imgSrc = hasValidImg ? recipe.image : CARTOON_CHEF_IMG;
+                const isChefFallback = !hasValidImg || imgSrc.includes('svg+xml');
+                
+                return `
+                <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+                    <div>
+                        <div class="w-full h-44 bg-slate-100 overflow-hidden relative flex items-center justify-center">
+                            <img src="${imgSrc}" alt="${recipe.title}" 
+                                class="w-full h-full ${isChefFallback ? 'object-contain p-3' : 'object-cover'} group-hover:scale-105 transition duration-300" 
+                                onerror="this.onerror=null; this.src=CARTOON_CHEF_IMG; this.className='w-full h-full object-contain p-3';">
+                            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/80 backdrop-blur-md text-white">
+                                ⏱️ ${recipe.totalTime} mins
+                            </span>
+                        </div>
+
+                        <div class="p-5 space-y-3">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md">
+                                    ${recipe.category || 'Recipe'}
+                                </span>
+                                <span class="text-xs text-slate-400 font-medium">Difficulty: ${recipe.difficulty}</span>
+                            </div>
+
+                            <h3 class="font-serif font-bold text-slate-900 text-lg leading-snug group-hover:text-brand-600 transition">
+                                ${recipe.title}
+                            </h3>
+
+                            ${dietTags.length > 0 ? `
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    ${dietTags.map(t => `<span class="text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/60 px-1.5 py-0.5 rounded-md">🌱 ${t}</span>`).join('')}
+                                </div>
+                            ` : ''}
+
+                            <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-semibold text-slate-600 pt-1">
+                                <span class="bg-slate-100 px-2 py-0.5 rounded-md">🔥 ${recipe.macros ? recipe.macros.calories : 250} kcal</span>
+                                <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md">💪 ${recipe.macros ? recipe.macros.protein : 12}g protein</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <button onclick='openRecipeModal(${JSON.stringify(recipe).replace(/'/g, "&apos;")})' class="w-full bg-slate-900 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <span>View Recipe & Steps</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            lucide.createIcons();
+        }
+
+        async function triggerCameraCapture() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast("⚠️ Camera Unavailable", "Your browser does not support live video feed. Opening file picker instead...");
+                document.getElementById('upload-file-input')?.click();
+                return;
+            }
+
+            try {
+                if (activeCameraStream) {
+                    activeCameraStream.getTracks().forEach(track => track.stop());
+                }
+
+                activeCameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
+                });
+
+                const video = document.getElementById('camera-video-feed');
+                if (video) {
+                    video.srcObject = activeCameraStream;
+                    await video.play();
+                }
+
+                const modal = document.getElementById('camera-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+                showToast("📷 Live Camera Active", "Point camera at your fridge items and tap Snap!");
+            } catch (err) {
+                console.error("Camera access error:", err);
+                showToast("⚠️ Camera Access Denied", "Opening file upload dialog instead.");
+                document.getElementById('upload-file-input')?.click();
+            }
+        }
+
+        function closeCameraModal() {
+            if (activeCameraStream) {
+                activeCameraStream.getTracks().forEach(track => track.stop());
+                activeCameraStream = null;
+            }
+            const modal = document.getElementById('camera-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        async function switchCameraFacing() {
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+            await triggerCameraCapture();
+        }
+
+        async function snapLiveCameraPhoto() {
+            const video = document.getElementById('camera-video-feed');
+            const canvas = document.getElementById('camera-canvas');
+            if (!video || !canvas) return;
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const base64Data = dataUrl.split(',')[1];
+
+            closeCameraModal();
+            showToast("📷 Gemini Vision Active", "Analyzing live photo frame...");
+
+            await analyzeBase64ImageWithGemini(base64Data, 'image/jpeg');
+        }
+
+        async function analyzeBase64ImageWithGemini(base64Data, mimeType) {
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: "Identify all edible fridge or pantry food ingredients visible in this photo. Return ONLY a valid JSON array of short string ingredient names, e.g. [\"Eggs\", \"Tomatoes\", \"Cheese\", \"Garlic\"]. Do not include markdown formatting or extra text." },
+                        { inlineData: { mimeType: mimeType, data: base64Data } }
+                    ]
+                }]
+            };
+
+            try {
+                const data = await callGeminiApi(payload);
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) {
+                    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    let items = [];
+                    try {
+                        items = JSON.parse(cleanJson);
+                    } catch (pErr) {
+                        items = cleanJson.replace(/[\[\]"]/g, '').split(',').map(s => s.trim()).filter(Boolean);
+                    }
+
+                    if (Array.isArray(items) && items.length > 0) {
+                        items.forEach(item => {
+                            const formatted = item.charAt(0).toUpperCase() + item.slice(1);
+                            if (!activeIngredients.includes(formatted)) {
+                                activeIngredients.push(formatted);
+                            }
+                        });
+                        renderIngredientTags();
+                        generateRecipes();
+                        showToast("🎉 Ingredients Identified!", `Detected: ${items.join(', ')}`);
+                        return;
+                    }
+                }
+                showToast("⚠️ Vision Notice", "Could not clearly identify ingredients. Try another photo or angle.");
+            } catch (err) {
+                console.error("Gemini Vision AI error:", err);
+                showToast("⚠️ Scan Failed", err.message || "Could not analyze image.");
+            }
+        }
+
+        async function handlePhotoScan(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            showToast("📷 Gemini Vision Active", "Analyzing uploaded fridge photo...");
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                const mimeType = file.type || 'image/jpeg';
+                await analyzeBase64ImageWithGemini(base64Data, mimeType);
+                event.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadSampleScenario(type) {
+            if (type === 'breakfast') {
+                activeIngredients = ['Eggs', 'Tomatoes', 'Cheese'];
+            } else if (type === 'pantry') {
+                activeIngredients = ['Pasta', 'Garlic', 'Tomatoes'];
+            }
+            renderIngredientTags();
+            generateRecipes();
+            showToast("🍳 Scenario Loaded", `Loaded ${type} fridge items!`);
+        }
+
+        function startVoiceInput() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("🎙️ Not Supported", "Voice recognition is not supported in this browser.");
+                return;
+            }
+
+            const micBtn = document.getElementById('mic-btn');
+            const rec = new SpeechRecognition();
+            rec.lang = 'en-US';
+            rec.start();
+
+            if (micBtn) micBtn.classList.add('text-red-400', 'animate-pulse');
+
+            rec.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                const input = document.getElementById('ingredient-search-input');
+                if (input) input.value = transcript;
+                addIngredientFromInput();
+            };
+
+            rec.onend = () => {
+                if (micBtn) micBtn.classList.remove('text-red-400', 'animate-pulse');
+            };
+        }
+
+        function openPantryLocker() {
+            renderPantryStaples();
+            const modal = document.getElementById('pantry-locker-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closePantryLocker() {
+            const modal = document.getElementById('pantry-locker-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            generateRecipes();
+        }
+
+        function renderPantryStaples() {
+            const grid = document.getElementById('pantry-staples-grid');
+            if (!grid) return;
+
+            grid.innerHTML = pantryStaples.map((staple, idx) => `
+                <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold px-2.5 py-1 rounded-full">
+                    <span>🧂 ${staple}</span>
+                    <button onclick="removePantryStaple(${idx})" class="hover:text-red-600 text-amber-700">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </span>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function addPantryStaple() {
+            const input = document.getElementById('new-staple-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) return;
+
+            const formatted = val.charAt(0).toUpperCase() + val.slice(1);
+            if (!pantryStaples.includes(formatted)) {
+                pantryStaples.push(formatted);
+                localStorage.setItem('ff_pantry_staples', JSON.stringify(pantryStaples));
+                renderPantryStaples();
+                showToast("🧂 Staple Added", `Saved ${formatted} to Pantry Locker!`);
+            }
+            input.value = '';
+        }
+
+        function removePantryStaple(index) {
+            pantryStaples.splice(index, 1);
+            localStorage.setItem('ff_pantry_staples', JSON.stringify(pantryStaples));
+            renderPantryStaples();
+        }
+
+        function openRecipeModal(recipe) {
+            currentModalRecipe = recipe;
+            scaledServings = 2;
+
+            const modal = document.getElementById('recipe-modal');
+            const title = document.getElementById('modal-title');
+            const desc = document.getElementById('modal-description');
+            const img = document.getElementById('modal-img');
+            const imgContainer = document.getElementById('modal-img-container');
+            const timeBadge = document.getElementById('modal-time-badge');
+            const diffBadge = document.getElementById('modal-difficulty-badge');
+
+            if (title) title.innerText = recipe.title;
+            if (desc) desc.innerText = `Detailed preparation and cooking instructions for ${recipe.title}.`;
+            if (timeBadge) timeBadge.innerText = `⏱️ ${recipe.totalTime} mins`;
+            if (diffBadge) diffBadge.innerText = recipe.difficulty;
+
+            const hasValidImg = recipe.image && recipe.image.trim().length > 0 && recipe.image.startsWith('http');
+            const imgSrc = hasValidImg ? recipe.image : CARTOON_CHEF_IMG;
+
+            if (img) {
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = CARTOON_CHEF_IMG;
+                    this.className = "w-full h-full object-contain p-4 bg-slate-100";
+                };
+                img.src = imgSrc;
+                if (!hasValidImg || imgSrc.includes('svg+xml')) {
+                    img.className = "w-full h-full object-contain p-4 bg-slate-100";
+                } else {
+                    img.className = "w-full h-full object-cover";
+                }
+                if (imgContainer) imgContainer.style.display = 'block';
+            }
+
+            scaleServings(2);
+            renderModalSteps();
+
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeRecipeModal() {
+            const modal = document.getElementById('recipe-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (isHandsFreeActive) toggleHandsFreeMode();
+            window.speechSynthesis?.cancel();
+        }
+
+        function scaleServings(servings) {
+            scaledServings = parseInt(servings);
+            const countEl = document.getElementById('modal-servings-count');
+            if (countEl) countEl.innerText = `${scaledServings} Serving${scaledServings > 1 ? 's' : ''}`;
+
+            const multiplier = scaledServings / 2;
+
+            if (currentModalRecipe && currentModalRecipe.macros) {
+                document.getElementById('modal-macro-calories').innerText = `${Math.round(currentModalRecipe.macros.calories * multiplier)} kcal`;
+                document.getElementById('modal-macro-protein').innerText = `${Math.round(currentModalRecipe.macros.protein * multiplier)}g`;
+                document.getElementById('modal-macro-carbs').innerText = `${Math.round(currentModalRecipe.macros.carbs * multiplier)}g`;
+                document.getElementById('modal-macro-fat').innerText = `${Math.round(currentModalRecipe.macros.fat * multiplier)}g`;
+            }
+
+            const listEl = document.getElementById('modal-ingredients-list');
+            if (listEl && currentModalRecipe) {
+                listEl.innerHTML = currentModalRecipe.ingredients.map(ing => {
+                    const scaledAmt = (ing.amount * multiplier).toFixed(1).replace(/\.0$/, '');
+                    return `
+                        <li class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/60">
+                            <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                            <span class="font-bold text-slate-900">${scaledAmt} ${ing.unit}</span>
+                            <span class="text-slate-600">${ing.name}</span>
+                        </li>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderModalSteps() {
+            const listEl = document.getElementById('modal-steps-list');
+            if (!listEl || !currentModalRecipe) return;
+
+            listEl.innerHTML = currentModalRecipe.steps.map((step, idx) => `
+                <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 transition">
+                    <span class="w-6 h-6 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                        ${idx + 1}
+                    </span>
+                    <p class="text-xs text-slate-800 leading-relaxed">${step}</p>
+                </div>
+            `).join('');
+        }
+
+        function speakCurrentStep() {
+            if (!currentModalRecipe || !currentModalRecipe.steps) return;
+            window.speechSynthesis?.cancel();
+
+            const stepText = `Step ${currentStepVoiceIndex + 1}: ${currentModalRecipe.steps[currentStepVoiceIndex]}`;
+            const utterance = new SpeechSynthesisUtterance(stepText);
+            utterance.rate = 0.95;
+            window.speechSynthesis?.speak(utterance);
+        }
+
+        function toggleHandsFreeMode() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("🎙️ Speech Recognition Unavailable", "Voice control is not supported by your browser.");
+                return;
+            }
+
+            const banner = document.getElementById('handsfree-status-banner');
+
+            if (isHandsFreeActive) {
+                if (handsFreeRecognition) handsFreeRecognition.stop();
+                isHandsFreeActive = false;
+                if (banner) banner.classList.add('hidden');
+                showToast("🎙️ Hands-Free Off", "Voice commands deactivated.");
+                return;
+            }
+
+            handsFreeRecognition = new SpeechRecognition();
+            handsFreeRecognition.continuous = true;
+            handsFreeRecognition.lang = 'en-US';
+
+            handsFreeRecognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+
+                if (transcript.includes('next')) {
+                    if (currentModalRecipe && currentStepVoiceIndex < currentModalRecipe.steps.length - 1) {
+                        currentStepVoiceIndex++;
+                        speakCurrentStep();
+                    }
+                } else if (transcript.includes('back') || transcript.includes('previous')) {
+                    if (currentStepVoiceIndex > 0) {
+                        currentStepVoiceIndex--;
+                        speakCurrentStep();
+                    }
+                } else if (transcript.includes('repeat')) {
+                    speakCurrentStep();
+                }
+            };
+
+            handsFreeRecognition.start();
+            isHandsFreeActive = true;
+            currentStepVoiceIndex = 0;
+            if (banner) banner.classList.remove('hidden');
+            speakCurrentStep();
+            showToast("🎙️ Hands-Free Active", "Say 'Next', 'Back', or 'Repeat' while cooking!");
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-start-btn');
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                if (btn) btn.innerText = 'Start';
+            } else {
+                isTimerRunning = true;
+                if (btn) btn.innerText = 'Pause';
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        showToast("⏰ Timer Finished!", "Your kitchen timer step is done!");
+                        if (btn) btn.innerText = 'Start';
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 300;
+            updateTimerDisplay();
+            const btn = document.getElementById('timer-start-btn');
+            if (btn) btn.innerText = 'Start';
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            const display = document.getElementById('timer-display');
+            if (display) display.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function renderWeeklyPlanner() {
+            const calGrid = document.getElementById('weekly-calendar-grid');
+            if (!calGrid) return;
+
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+            calGrid.innerHTML = days.map(day => {
+                const assigned = weeklyPlan[day] || '';
+                return `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-xl bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                                ${day}
+                            </span>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${assigned || 'No meal scheduled'}</h4>
+                                <p class="text-[11px] text-slate-400">Assign a recipe or type custom dish</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                            <select onchange="assignMealToDay('${day}', this.value)" class="bg-slate-100 text-xs text-slate-800 rounded-xl px-2.5 py-2 border border-slate-200 focus:outline-none">
+                                <option value="">Select Recipe...</option>
+                                ${CLASSIC_RECIPES_DATABASE.map(r => `<option value="${r.title}" ${r.title === assigned ? 'selected' : ''}>${r.title} (${r.totalTime}m)</option>`).join('')}
+                            </select>
+
+                            <input type="text" placeholder="Or type meal..." 
+                                id="custom-input-${day}"
+                                class="bg-slate-100 text-xs rounded-xl px-2.5 py-2 border border-slate-200 focus:outline-none w-28 sm:w-32"
+                                onkeydown="if(event.key==='Enter'){ assignMealToDay('${day}', this.value); event.preventDefault(); }">
+                            
+                            <button onclick="assignMealToDay('${day}', document.getElementById('custom-input-${day}').value)" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            generateGroceryList();
+        }
+
+        function assignMealToDay(day, mealTitle) {
+            if (!mealTitle) return;
+            weeklyPlan[day] = mealTitle;
+            localStorage.setItem('ff_weekly_plan', JSON.stringify(weeklyPlan));
+            renderWeeklyPlanner();
+            showToast("📅 Plan Updated", `Assigned ${mealTitle} to ${day}!`);
+        }
+
+        function clearMealPlan() {
+            weeklyPlan = { Mon:'', Tue:'', Wed:'', Thu:'', Fri:'', Sat:'', Sun:'' };
+            localStorage.setItem('ff_weekly_plan', JSON.stringify(weeklyPlan));
+            renderWeeklyPlanner();
+            showToast("📅 Plan Reset", "Cleared weekly meal calendar.");
+        }
+
+        function inferIngredientsFromDishTitle(title) {
+            const lower = title.toLowerCase();
+            const inferred = new Set();
+
+            if (lower.includes('taco')) ['Tacos', 'Ground Meat', 'Cheese', 'Tortillas'].forEach(i => inferred.add(i));
+            else if (lower.includes('pasta') || lower.includes('spaghetti')) ['Pasta', 'Garlic', 'Tomatoes', 'Olive Oil'].forEach(i => inferred.add(i));
+            else if (lower.includes('rice') || lower.includes('curry')) ['Rice', 'Onion', 'Curry Powder'].forEach(i => inferred.add(i));
+            else if (lower.includes('pizza')) ['Pizza Dough', 'Cheese', 'Tomato Sauce'].forEach(i => inferred.add(i));
+            else ['Onion', 'Cooking Oil', 'Seasoning'].forEach(i => inferred.add(i));
+
+            return Array.from(inferred);
+        }
+
+        function generateGroceryList() {
+            const container = document.getElementById('grocery-items-list');
+            if (!container) return;
+
+            const plannedDishes = Object.values(weeklyPlan).filter(Boolean);
+            if (plannedDishes.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 italic text-xs">Assign meals to your schedule to auto-generate a shopping list!</p>`;
+                return;
+            }
+
+            const neededIngredients = new Set();
+            plannedDishes.forEach(title => {
+                const classic = CLASSIC_RECIPES_DATABASE.find(r => r.title.toLowerCase() === title.toLowerCase());
+                if (classic) {
+                    classic.ingredients.forEach(i => neededIngredients.add(i.name));
+                } else {
+                    inferIngredientsFromDishTitle(title).forEach(i => neededIngredients.add(i));
+                }
+            });
+
+            const missing = Array.from(neededIngredients).filter(ing => {
+                const lower = ing.toLowerCase();
+                const inFridge = activeIngredients.some(a => a.toLowerCase() === lower);
+                const inStaples = pantryStaples.some(p => p.toLowerCase() === lower);
+                return !inFridge && !inStaples;
+            });
+
+            if (missing.length === 0) {
+                container.innerHTML = `<p class="text-emerald-700 font-bold bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs">🎉 All ingredients available in your fridge or Pantry Locker!</p>`;
+                return;
+            }
+
+            container.innerHTML = missing.map(item => `
+                <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-white transition">
+                    <input type="checkbox" class="rounded text-brand-600 focus:ring-brand-500">
+                    <span class="font-medium text-slate-800 text-xs">${item}</span>
+                </label>
+            `).join('');
+        }
+
+        function copyGroceryList() {
+            const items = Array.from(document.querySelectorAll('#grocery-items-list span')).map(el => el.innerText.trim());
+            if (items.length === 0) return;
+            const text = "🛒 Fridge Feast Grocery List:\n" + items.map(i => `• ${i}`).join('\n');
+            navigator.clipboard.writeText(text);
+            showToast("📋 Copied", "Grocery list copied to clipboard!");
+        }
+
+        function shareGroceryWhatsApp() {
+            const items = Array.from(document.querySelectorAll('#grocery-items-list span')).map(el => el.innerText.trim());
+            if (items.length === 0) return;
+            const text = encodeURIComponent("🛒 *Fridge Feast Grocery List*\n\n" + items.map(i => `• ${i}`).join('\n'));
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+
+        function exportMealPlanICS() {
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Fridge Feast//Weekly Schedule//EN\n";
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            
+            days.forEach(day => {
+                const title = weeklyPlan[day];
+                if (title) {
+                    ics += `BEGIN:VEVENT\nSUMMARY:🍳 Cook ${title}\nDESCRIPTION:Planned dinner: ${title}\nEND:VEVENT\n`;
+                }
+            });
+            ics += "END:VCALENDAR";
+
+            const blob = new Blob([ics], { type: 'text/calendar' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'weekly_meal_schedule.ics';
+            link.click();
+            showToast("📅 iCal Exported", "Calendar file downloaded!");
+        }
+
+        function markMealAsCooked() {
+            if (!currentModalRecipe) return;
+
+            impactStats.mealsCooked++;
+            impactStats.wastePreventedKg = parseFloat((impactStats.wastePreventedKg + 0.4).toFixed(1));
+            impactStats.history.unshift({
+                title: currentModalRecipe.title,
+                date: new Date().toLocaleDateString(),
+                savedAmount: CURRENCY_SAVINGS_PER_MEAL[userCurrency] || 12.50
+            });
+
+            localStorage.setItem('ff_impact_stats', JSON.stringify(impactStats));
+            updateImpactDashboardUI();
+            closeRecipeModal();
+            showToast("🎉 Meal Cooked!", `Updated your savings dashboard!`);
+        }
+
+        function changeCurrency(curr) {
+            userCurrency = curr;
+            localStorage.setItem('ff_currency', curr);
+            updateImpactDashboardUI();
+            showToast("💰 Currency Updated", `Set currency to ${curr}`);
+        }
+
+        function updateImpactDashboardUI() {
+            const symbol = CURRENCY_SYMBOLS[userCurrency] || '$';
+            const rate = CURRENCY_SAVINGS_PER_MEAL[userCurrency] || 12.50;
+
+            const totalSaved = impactStats.mealsCooked * rate;
+
+            const savedEl = document.getElementById('stat-money-saved');
+            const cookedEl = document.getElementById('stat-meals-cooked');
+            const wasteEl = document.getElementById('stat-waste-prevented');
+            const historyEl = document.getElementById('cooking-history-list');
+
+            if (savedEl) savedEl.innerText = `${symbol}${totalSaved.toFixed(2)}`;
+            if (cookedEl) cookedEl.innerText = impactStats.mealsCooked;
+            if (wasteEl) wasteEl.innerText = `${impactStats.wastePreventedKg} kg`;
+
+            if (historyEl) {
+                if (impactStats.history.length === 0) {
+                    historyEl.innerHTML = `<p class="text-slate-400 italic">No meals logged yet. Cook a recipe and click "Mark Meal as Cooked 🎉"!</p>`;
+                } else {
+                    historyEl.innerHTML = impactStats.history.map(item => `
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <div>
+                                <span class="font-bold text-slate-800 block">${item.title}</span>
+                                <span class="text-[10px] text-slate-400">${item.date}</span>
+                            </div>
+                            <span class="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                                +${symbol}${rate.toFixed(2)} saved
+                            </span>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        async function sendChefNovusMessage() {
+            const input = document.getElementById('chat-user-input');
+            const container = document.getElementById('chat-messages-container');
+            if (!input || !container) return;
+
+            const query = input.value.trim();
+            if (!query) return;
+
+            container.innerHTML += `
+                <div class="flex items-start justify-end gap-2">
+                    <div class="bg-brand-600 text-white p-3 rounded-2xl rounded-tr-none text-xs max-w-[85%] shadow-sm">
+                        ${query}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            const loadingId = `load-${Date.now()}`;
+            container.innerHTML += `
+                <div id="${loadingId}" class="flex items-start gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">Novus</div>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 text-slate-400 italic text-xs">
+                        Chef Novus is thinking...
+                    </div>
+                </div>
+            `;
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                const payload = { contents: [{ parts: [{ text: query }] }] };
+                const sysInst = "You are Chef Novus, an expert master chef assistant. Provide concise, encouraging culinary advice, ingredient substitutions, and cooking tips.";
+                
+                const data = await callGeminiApi(payload, sysInst);
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't process that recipe question. Try asking again!";
+
+                document.getElementById(loadingId)?.remove();
+
+                container.innerHTML += `
+                    <div class="flex items-start gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">Novus</div>
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 text-xs max-w-[85%] shadow-sm leading-relaxed">
+                            ${text.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById(loadingId)?.remove();
+                container.innerHTML += `
+                    <div class="flex items-start gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">Novus</div>
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200 text-slate-800 text-xs">
+                            ⚠️ Error: ${e.message || "Failed to reach Gemini API"}. Please check your server environment variables or API key.
+                        </div>
+                    </div>
+                `;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showToast(title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = "bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl border border-slate-800 text-xs pointer-events-auto flex items-start gap-3 transform transition-all duration-300 translate-y-2 opacity-0";
+            toast.innerHTML = `
+                <div class="w-2 h-2 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></div>
+                <div>
+                    <h4 class="font-bold text-white">${title}</h4>
+                    <p class="text-slate-300 text-[11px]">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIngredientTags();
+            generateRecipes();
+            updateImpactDashboardUI();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
