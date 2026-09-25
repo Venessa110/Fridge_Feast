@@ -7,11 +7,13 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Retrieve the secret API key from server environment variables (never exposed to browser)
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    // Check all possible environment variable names set in Vercel
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
     if (!GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'Server environment variable GEMINI_API_KEY is missing.' });
+        return res.status(500).json({ 
+            error: 'Server environment variable GEMINI_API_KEY is missing. Please add GEMINI_API_KEY under Vercel Project Settings -> Environment Variables and redeploy.' 
+        });
     }
 
     const { payload, systemInstruction, model } = req.body || {};
