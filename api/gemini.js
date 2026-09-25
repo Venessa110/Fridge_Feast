@@ -53,7 +53,7 @@ async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error( 'Google Gemini API Error Details:' JSON.stringify(data, null, 2));
+            console.error( 'Google Gemini API Error Details:', JSON.stringify(data, null, 2));
             return res.status(response.status).json(data);
         }
 
