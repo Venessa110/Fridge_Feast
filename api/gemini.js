@@ -21,7 +21,7 @@ async function handler(req, res) {
     }
 
     const { payload, systemInstruction, model } = req.body || {};
-    const selectedModel = model || 'gemini-3.5-flash';
+    const selectedModel = model || 'gemini-1.5-flash';
     
     if (!payload) {
         return res.status(400).json({ error: 'Payload body missing from request.' });
