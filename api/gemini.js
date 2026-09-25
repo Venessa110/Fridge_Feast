@@ -1,6 +1,16 @@
 // Node.js / Vercel Serverless Function Proxy
 // File path: api/gemini.js
 
+// api/gemini.js
+export default async function handler(req, res) {
+    console.log("Vercel Environment Keys Present:", {
+        hasGeminiKey: !!process.env.GEMINI_API_KEY,
+        hasGoogleKey: !!process.env.GOOGLE_API_KEY,
+        hasGenAIKey: !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    });
+    
+//to check why eror 500 occurs
+
 export default async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
