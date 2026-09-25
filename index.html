@@ -637,7 +637,9 @@
                 if (proxyRes.ok) {
                     const data = await proxyRes.json();
                     return data;
-                }
+                }else {
+                    const errData = await proxyRes.json().catch(() => ({}));
+                    console.warn('Backend proxy returned an error status:', proxyRes.status, errData);
             } catch (proxyError) {
                 console.warn('Backend proxy unconfigured or unreachable, attempting direct API fallback...', proxyError);
             }
@@ -652,7 +654,15 @@
                 try {
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
                     
-                    const bodyData = { ...payload };
+                    const bodyData = {
+                        contents: [
+                            {
+                                parts: [
+                                    { text: payload }
+                                    ]
+                            }
+                            ]
+                    };
                     if (systemInstruction) {
                         bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
                     }
