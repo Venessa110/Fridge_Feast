@@ -640,6 +640,7 @@
                 }else {
                     const errData = await proxyRes.json().catch(() => ({}));
                     console.warn('Backend proxy returned an error status:', proxyRes.status, errData);
+                }
             } catch (proxyError) {
                 console.warn('Backend proxy unconfigured or unreachable, attempting direct API fallback...', proxyError);
             }
