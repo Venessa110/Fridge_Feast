@@ -44,7 +44,7 @@ if (typeof payload === 'object' && payload !== null) {
             contents: [
                 { 
                     parts: [
-                        { text: payload }
+                        { text: promptText }
                         ]
                 }
                 ]
