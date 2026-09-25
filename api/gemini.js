@@ -21,14 +21,14 @@ async function handler(req, res) {
     }
 
     const { payload, systemInstruction, model } = req.body || {};
-    const selectedModel = model || 'gemini-2.5-flash';
+    const selectedModel = model || 'gemini-3.8-flash';
     
     if (!payload) {
         return res.status(400).json({ error: 'Payload body missing from request.' });
     }
 
     try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
+        const apiUrl = `https://googleapis.com{GEMINI_API_KEY}`;
 
         // Ensure payload text is extracted as a string regardless of frontend structure
 let promptText = "";
