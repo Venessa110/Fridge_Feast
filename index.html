@@ -2,8 +2,12 @@
 <html lang="en" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Novus AI 🥗 | Smart Recipe & Meal Planner</title>
+    
+    <!-- Favicon matching the header logo -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8h1a4 4 0 0 1 0 8h-1'/><path d='M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z'/><line x1='6' y1='1' x2='6' y2='4'/><line x1='10' y1='1' x2='10' y2='4'/><line x1='14' y1='1' x2='14' y2='4'/></svg>">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -33,6 +37,11 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-serif { font-family: 'Playfair Display', serif; }
         
+        @media (max-width: 640px) {
+            body { font-size: 14px; }
+            input, select, button { font-size: 16px !important; } /* Prevents iOS auto-zoom on focus */
+        }
+
         @media print {
             body * { visibility: hidden; }
             #recipe-modal, #recipe-modal * { visibility: visible; }
@@ -59,25 +68,20 @@
 
                 <!-- Navigation Tabs & API Key Button -->
                 <div class="flex items-center gap-2">
-                    <nav class="flex items-center space-x-1 sm:space-x-2">
-                        <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i>
-                <!-- Navigation Tabs -->
-                <div class="flex items-center gap-2">
-                    <nav class="flex items-center space-x-1 sm:space-x-2">
-                        <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700">
+                    <nav class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-1">
+                        <button onclick="switchTab('recipes')" id="tab-btn-recipes" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700 flex-shrink-0">
                             <i data-lucide="sparkles" class="w-4 h-4"></i>
                             <span>Find Recipes</span>
                         </button>
-                        <button onclick="switchTab('planner')" id="tab-btn-planner" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                        <button onclick="switchTab('planner')" id="tab-btn-planner" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0">
                             <i data-lucide="calendar" class="w-4 h-4"></i>
                             <span>Meal Planner</span>
                         </button>
-                        <button onclick="switchTab('impact')" id="tab-btn-impact" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                        <button onclick="switchTab('impact')" id="tab-btn-impact" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0">
                             <i data-lucide="piggy-bank" class="w-4 h-4"></i>
                             <span>Savings</span>
                         </button>
-                        <button onclick="switchTab('chat')" id="tab-btn-chat" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                        <button onclick="switchTab('chat')" id="tab-btn-chat" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0">
                             <i data-lucide="bot" class="w-4 h-4"></i>
                             <span class="hidden md:inline">Chef Novus</span>
                         </button>
@@ -378,7 +382,6 @@
                             <p class="text-[10px] text-slate-400">Ask for ingredient substitutions, wine pairings, or cooking tips</p>
                         </div>
                     </div>
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30">Gemini AI Active</span>
                 </div>
 
                 <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
@@ -404,6 +407,69 @@
         </section>
 
     </main>
+
+    <!-- Professional Footer Section -->
+    <footer class="bg-white border-t border-slate-200 mt-auto text-slate-600 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Col 1: Brand Info -->
+                <div class="space-y-3 md:col-span-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-sm">
+                            <i data-lucide="utensils" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-base font-bold font-serif text-slate-900">Novus AI 🥗</span>
+                    </div>
+                    <p class="text-slate-500 text-[11px] leading-relaxed">
+                        Empowering home kitchens with AI vision and strict ingredient matching to reduce food waste and cook smarter every day.
+                    </p>
+                </div>
+
+                <!-- Col 2: Quick Navigation -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Quick Navigation</h4>
+                    <ul class="space-y-1.5">
+                        <li><button onclick="switchTab('recipes')" class="hover:text-brand-600 transition">Find Recipes</button></li>
+                        <li><button onclick="switchTab('planner')" class="hover:text-brand-600 transition">Weekly Meal Planner</button></li>
+                        <li><button onclick="switchTab('impact')" class="hover:text-brand-600 transition">Savings Dashboard</button></li>
+                        <li><button onclick="switchTab('chat')" class="hover:text-brand-600 transition">Chef Novus AI</button></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Legal & Policy -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Legal & Trust</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="#about" onclick="showToast('ℹ️ About Novus AI', 'Novus AI is an advanced culinary platform driven by AI vision and strict ingredient matching algorithms designed to eliminate food waste and inspire creative home cooking.'); return false;" class="hover:text-brand-600 transition">About Us</a></li>
+                        <li><a href="#privacy" onclick="showToast('🔒 Privacy Policy', 'Your privacy is paramount. Fridge photos and ingredient data are processed securely in real-time and are never sold or stored permanently without consent.'); return false;" class="hover:text-brand-600 transition">Privacy Policy</a></li>
+                        <li><a href="#terms" onclick="showToast('📄 Terms & Conditions', 'By using Fridge Feast, you agree to cook responsibly, verify food safety, and use our AI culinary recommendations at your own discretion.'); return false;" class="hover:text-brand-600 transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Developer Contact -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Contact Developers</h4>
+                    <p class="text-slate-500 text-[11px]">Have feedback, bug reports, or feature ideas? Get in touch with our engineering team.</p>
+                    <div class="pt-1 flex flex-col gap-1.5">
+                        <a href="mailto:venessanyaboke2@gmail.com" class="inline-flex items-center gap-1.5 text-brand-700 font-semibold hover:underline">
+                            <i data-lucide="mail" class="w-3.5 h-3.5"></i> venessanyaboke2@gmail.com
+                        </a>
+                        <a href="https://wa.me/254743130372" target="_blank" class="inline-flex items-center gap-1.5 text-emerald-700 font-semibold hover:underline">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp: 0743130372
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
+                <p>&copy; 2026 Novus AI. All Rights Reserved.</p>
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1 text-emerald-600 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Systems Operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Recipe Details Modal -->
     <div id="recipe-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -637,7 +703,7 @@
                 if (proxyRes.ok) {
                     const data = await proxyRes.json();
                     return data;
-                }else {
+                } else {
                     const errData = await proxyRes.json().catch(() => ({}));
                     console.warn('Backend proxy returned an error status:', proxyRes.status, errData);
                 }
@@ -653,16 +719,16 @@
             let lastError = null;
             for (const model of GEMINI_MODELS) {
                 try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${GEMINI_API_KEY}`;
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
                     
                     const bodyData = {
                         contents: [
                             {
                                 parts: [
-                                    { text: payload }
-                                    ]
+                                    { text: typeof payload === 'string' ? payload : JSON.stringify(payload) }
+                                ]
                             }
-                            ]
+                        ]
                     };
                     if (systemInstruction) {
                         bodyData.systemInstruction = { parts: [{ text: systemInstruction }] };
@@ -853,7 +919,7 @@
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (sec) sec.classList.add('hidden');
                 if (btn) {
-                    btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                    btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0";
                 }
             });
 
@@ -861,7 +927,7 @@
             const targetBtn = document.getElementById(`tab-btn-${tabId}`);
             if (targetSec) targetSec.classList.remove('hidden');
             if (targetBtn) {
-                targetBtn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700";
+                targetBtn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 bg-brand-50 text-brand-700 flex-shrink-0";
             }
 
             if (tabId === 'planner') renderWeeklyPlanner();
@@ -1862,21 +1928,27 @@ Return JSON adhering to this exact schema structure:
             if (!container) return;
 
             const toast = document.createElement('div');
-            toast.className = "bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl border border-slate-800 text-xs pointer-events-auto flex items-start gap-3 transform transition-all duration-300 translate-y-2 opacity-0";
+            toast.className = "bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-800 text-xs pointer-events-auto flex flex-col gap-1.5 max-w-sm transform transition-all duration-300 translate-y-2 opacity-0";
+            
+            let detailedMsg = message;
+            if (title.includes('About')) {
+                detailedMsg = "Novus AI was engineered with a mission to bridge the gap between pantry inventory and gourmet home cooking. By leveraging cutting-edge vision AI and strict ingredient-matching algorithms, our platform helps households drastically reduce food waste, save significant money on grocery bills, and discover delicious recipes tailored precisely to what is already sitting in their fridges.";
+            } else if (title.includes('Privacy')) {
+                detailedMsg = "Privacy Policy: We take data security very seriously. Photos uploaded or snapped via camera are transmitted securely via encrypted channels solely for real-time AI ingredient identification and are never stored on persistent commercial databases or shared with third-party advertisers. All local user preferences, pantry staples, and schedules are stored securely in your browser's local storage.";
+            } else if (title.includes('Terms')) {
+                detailedMsg = "Terms & Conditions: By accessing and using Fridge Feast, you acknowledge that AI-generated recipe suggestions and nutritional estimations are provided for informational and creative purposes. Users are responsible for verifying food freshness, allergy considerations, and dietary requirements before cooking or consuming any meals.";
+            }
+
             toast.innerHTML = `
-                <div class="w-2 h-2 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></div>
-                <div>
-                    <h4 class="font-bold text-white">${title}</h4>
-                    <p class="text-slate-300 text-[11px]">${message}</p>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <h4 class="font-bold text-brand-400 text-sm">${title}</h4>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-slate-400 hover:text-white">&times;</button>
                 </div>
+                <p class="text-slate-200 text-xs leading-relaxed">${detailedMsg}</p>
             `;
 
             container.appendChild(toast);
             setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
